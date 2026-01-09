@@ -102,13 +102,21 @@ export const useChat = (userData: LandingScreenData) => {
 
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({
-                    model: "gemini-pro",
-                    systemInstruction: getSystemInstruction(userData),
+                    model: "gemini-flash-latest",
                 });
 
                 const chat = model.startChat({
-                    history: [],
-                }); xw
+                    history: [
+                        {
+                            role: "user",
+                            parts: [{ text: getSystemInstruction(userData) }]
+                        },
+                        {
+                            role: "model",
+                            parts: [{ text: "네, 알겠습니다. 친구처럼 상담해드릴게요." }]
+                        }
+                    ],
+                });
                 setChatSession(chat);
 
                 // 3. Send Initial Message to AI
