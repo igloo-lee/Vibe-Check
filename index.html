@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Check</title>
+
+  <!-- 1. Font Application (CDN) -->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 2. Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'sans-serif'],
+          },
+          colors: {
+            background: '#000000',
+            foreground: '#FFFFFF',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- 3. Global Styles -->
+  <style>
+    body {
+      background-color: #000000;
+      color: #FFFFFF;
+      font-family: 'Pretendard', sans-serif;
+      letter-spacing: -0.02em;
+      /* Ensuring the background remains black even outside the max-width container */
+      min-height: 100vh;
+      margin: 0;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/src/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+</body>
+
+</html>
