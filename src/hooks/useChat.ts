@@ -99,7 +99,7 @@ export const useChat = (userData: LandingScreenData) => {
 
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({
-                    model: "gemini-flash-latest",
+                    model: "gemini-1.5-flash-001",
                     systemInstruction: getSystemInstruction(userData),
                 });
 
