@@ -35,7 +35,10 @@ export const useChat = (userData: LandingScreenData) => {
             cleanText = cleanText.replace('[Final Analysis]', '').trim();
         }
 
-        // 3. Split by ||| for Multi-bubble
+        // 3. Remove Markdown Symbols (*, #, `)
+        cleanText = cleanText.replace(/[\*#`]/g, '');
+
+        // 4. Split by ||| for Multi-bubble
         const textChunks = cleanText.split('|||').map(t => t.trim()).filter(t => t);
 
         // 4. Sequential Display
@@ -99,13 +102,13 @@ export const useChat = (userData: LandingScreenData) => {
 
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({
-                    model: "gemini-flash-latest",
+                    model: "gemini-pro",
                     systemInstruction: getSystemInstruction(userData),
                 });
 
                 const chat = model.startChat({
                     history: [],
-                });
+                }); xw
                 setChatSession(chat);
 
                 // 3. Send Initial Message to AI
