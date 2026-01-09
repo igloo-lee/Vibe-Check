@@ -12,35 +12,34 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
-            transition: { delayChildren: 0.5 }
+            transition: { delayChildren: 0.3 }
         },
         exit: {
             opacity: 0,
             y: -20,
-            filter: "blur(10px)",
-            transition: { duration: 0.8 }
+            filter: "blur(5px)",
+            transition: { duration: 0.5 }
         }
     };
 
     const letterVariants = {
-        hidden: { opacity: 0, y: 20 },
+        hidden: { opacity: 0, y: 10 },
         visible: (i: number) => ({
             opacity: 1,
             y: 0,
             transition: {
-                delay: 0.5 + (i * 0.12), // 딜레이 직접 계산
-                type: "spring",
-                damping: 12,
-                stiffness: 100
+                delay: 0.2 + (i * 0.08), // 더 빠른 간격
+                duration: 0.4,
+                ease: "easeOut" // 부드러운 등장
             }
         })
     };
 
     const handleStepComplete = () => {
         if (step === 1) {
-            setTimeout(() => setStep(2), 2500);
+            setTimeout(() => setStep(2), 1500); // 1.5초로 단축
         } else if (step === 2) {
-            setTimeout(() => onComplete(), 2500);
+            setTimeout(() => onComplete(), 1500); // 1.5초로 단축
         }
     };
 
@@ -52,7 +51,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                     custom={i}
                     variants={letterVariants}
                     onAnimationComplete={
-                        // 마지막 글자이고, 완료 트리거가 필요할 때만 실행
                         (shouldTriggerComplete && i === text.length - 1)
                             ? handleStepComplete
                             : undefined
@@ -94,12 +92,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                             <motion.span
                                 custom={0}
                                 variants={letterVariants}
-                                className="font-bold text-white text-2xl"
+                                className="font-bold text-white text-3xl md:text-4xl"
                             >
                                 그럼
                             </motion.span>
-                            {/* 두 번째 줄은 '그럼'(글자1개 취급시) 다음부터 나와야 하므로 delay 보정 필요할 수 있으나, 
-                                단순하게 '그럼' + 딜레이 로직보다는 문구 전체를 트리거로 사용 */}
                             {renderText("Vibe Check 해!", true, true)}
                         </div>
                     </motion.div>
