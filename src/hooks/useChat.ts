@@ -17,7 +17,7 @@ export const useChat = (userData: LandingScreenData) => {
     const isInitialized = useRef(false);
 
     // Common function to process AI response (handles chips and multi-bubble messages)
-    const processAiResponse = (responseText: string, sessionId?: number) => {
+    const processAiResponse = (responseText: string, sessionId?: string) => {
         let cleanText = responseText;
         let newChips: string[] = [];
 
