@@ -16,6 +16,59 @@ export const useChat = (userData: LandingScreenData) => {
 
     const isInitialized = useRef(false);
 
+    // Common function to process AI response (handles chips and multi-bubble messages)
+    const processAiResponse = (responseText: string, sessionId?: number) => {
+        let cleanText = responseText;
+        let newChips: string[] = [];
+
+        // 1. Parse Chips
+        if (responseText.includes('__CHIPS__:')) {
+            const parts = responseText.split('__CHIPS__:');
+            cleanText = parts[0].trim();
+            const chipsPart = parts[1].trim();
+            newChips = chipsPart.split('|').map(c => c.trim()).filter(c => c.length > 0);
+        }
+
+        // 2. Handle Final Analysis Tag
+        if (cleanText.includes('[Final Analysis]')) {
+            newChips = [];
+            cleanText = cleanText.replace('[Final Analysis]', '').trim();
+        }
+
+        // 3. Split by ||| for Multi-bubble
+        const textChunks = cleanText.split('|||').map(t => t.trim()).filter(t => t);
+
+        // 4. Sequential Display
+        let cumulativeDelay = 0;
+
+        textChunks.forEach((chunk, index) => {
+            const isLast = index === textChunks.length - 1;
+            // Dynamic delay based on length (min 800ms, max 2000ms)
+            const typingDelay = Math.min(800 + chunk.length * 30, 2000);
+            cumulativeDelay += typingDelay;
+
+            setTimeout(() => {
+                const aiMsg: Message = {
+                    id: Date.now() + index,
+                    text: chunk,
+                    isUser: false,
+                    timestamp: new Date()
+                };
+
+                setMessages(prev => [...prev, aiMsg]);
+
+                if (sessionId) {
+                    saveMessage(sessionId, aiMsg);
+                }
+
+                if (isLast) {
+                    setIsAiTyping(false);
+                    setSuggestionChips(newChips);
+                }
+            }, cumulativeDelay);
+        });
+    };
+
     // Initialize Chat
     useEffect(() => {
         if (isInitialized.current) return;
@@ -39,11 +92,14 @@ export const useChat = (userData: LandingScreenData) => {
             try {
                 // 2. Initialize Gemini AI
                 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
-                if (!apiKey) throw new Error("API Key is missing");
+                if (!apiKey) {
+                    console.error("API Key missing. Check .env or Vercel Settings.");
+                    throw new Error("API Key is missing");
+                }
 
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({
-                    model: "gemini-flash-latest",
+                    model: "gemini-1.5-flash",
                     systemInstruction: getSystemInstruction(userData),
                 });
 
@@ -57,33 +113,8 @@ export const useChat = (userData: LandingScreenData) => {
                 const response = await result.response;
                 const responseText = response.text();
 
-                // 4. Parse Chips
-                let cleanText = responseText;
-                let newChips: string[] = [];
-
-                if (responseText.includes('__CHIPS__:')) {
-                    const parts = responseText.split('__CHIPS__:');
-                    cleanText = parts[0].trim();
-                    const chipsPart = parts[1].trim();
-                    newChips = chipsPart.split('|').map(c => c.trim()).filter(c => c.length > 0);
-                }
-
-                // 5. Update UI (Delayed)
-                setSuggestionChips(newChips);
-
-                const aiResponse: Message = {
-                    id: 2,
-                    text: cleanText,
-                    isUser: false,
-                    timestamp: new Date()
-                };
-
-                const delay = Math.random() * 1000 + 1500;
-                setTimeout(() => {
-                    setMessages(prev => [...prev, aiResponse]);
-                    setIsAiTyping(false);
-                    if (userData.sessionId) saveMessage(userData.sessionId, aiResponse);
-                }, delay);
+                // 4. Process Response
+                processAiResponse(responseText, userData.sessionId);
 
             } catch (error) {
                 console.error("AI Init Error:", error);
@@ -92,7 +123,7 @@ export const useChat = (userData: LandingScreenData) => {
                     ...prev,
                     {
                         id: 2,
-                        text: "API 연결에 실패했습니다. (API Key 또는 네트워크를 확인해주세요) 😭",
+                        text: "API 연결에 실패했습니다. (환경 변수를 확인해주세요) 😭",
                         isUser: false,
                         timestamp: new Date()
                     }
@@ -155,36 +186,7 @@ export const useChat = (userData: LandingScreenData) => {
             const response = await result.response;
             const responseText = response.text();
 
-            let cleanText = responseText;
-            let newChips: string[] = [];
-            if (responseText.includes('__CHIPS__:')) {
-                const parts = responseText.split('__CHIPS__:');
-                cleanText = parts[0].trim();
-                const chipsPart = parts[1].trim();
-                newChips = chipsPart.split('|').map(c => c.trim()).filter(c => c.length > 0);
-            }
-
-            if (cleanText.includes('[Final Analysis]')) {
-                newChips = [];
-                // [Final Analysis] 태그 제거
-                cleanText = cleanText.replace('[Final Analysis]', '').trim();
-            }
-
-            setSuggestionChips(newChips);
-
-            const aiResponse: Message = {
-                id: Date.now() + 1,
-                text: cleanText,
-                isUser: false,
-                timestamp: new Date()
-            };
-
-            const delay = Math.random() * 1500 + 1000;
-            setTimeout(() => {
-                setMessages(prev => [...prev, aiResponse]);
-                setIsAiTyping(false);
-                if (userData.sessionId) saveMessage(userData.sessionId, aiResponse);
-            }, delay);
+            processAiResponse(responseText, userData.sessionId);
 
         } catch (error) {
             console.error("AI Error:", error);
