@@ -7,14 +7,15 @@ import { ChatScreen } from './screens/ChatScreen';
 import { LandingScreenData } from './types';
 import { createSession } from './lib/db';
 
+import { SplashScreen } from './screens/SplashScreen';
+
 const App: React.FC = () => {
-  console.log("App Component Rendering");
+  const [showSplash, setShowSplash] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<'landing' | 'chat'>('landing');
   const [userData, setUserData] = useState<LandingScreenData | null>(null);
 
   const handleStart = async (data: LandingScreenData) => {
-    // Create DB session quietly (don't block UI strictly, or block if critical)
-    // For better data integrity, we wait for session creation.
+    // Create DB session
     const sessionId = await createSession(data);
     const dataWithSession = { ...data, sessionId: sessionId || undefined };
 
@@ -26,6 +27,10 @@ const App: React.FC = () => {
     setCurrentScreen('landing');
     setUserData(null);
   };
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
 
   return (
     <Layout>
