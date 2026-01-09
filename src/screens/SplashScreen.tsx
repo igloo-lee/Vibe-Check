@@ -37,9 +37,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
     const handleStepComplete = () => {
         if (step === 1) {
-            setTimeout(() => setStep(2), 1500); // 1.5초로 단축
+            setTimeout(() => setStep(2), 1000); // 1.5초 -> 1.0초로 단축
         } else if (step === 2) {
-            setTimeout(() => onComplete(), 1500); // 1.5초로 단축
+            setTimeout(() => onComplete(), 1500); // 1.5초 유지
         }
     };
 
